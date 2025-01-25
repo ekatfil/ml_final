@@ -1,0 +1,25 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+{% include "main/includes/menu.html" %}
+<div class="container mt-5">
+    <h1>Detection History</h1>
+    {% if user.is_authenticated %}
+        <p>Welcome, {{ user.username }}! <a href="{% url 'logout' %}">Logout</a></p>
+    {% else %}
+        <p><a href="{% url 'login' %}">Login</a> or <a href="{% url 'register' %}">Register</a></p>
+    {% endif %}
+    <ul>
+        {% for request in user_requests %}
+        <li>
+            <p>Date: {{ request.date }}</p>
+            <p>Method: {{ request.detection_method.name }}</p>
+            <p>Uploaded Photo: <img src="{{ request.uploaded_photo.url }}" width="200"></p>
+            <p>Processed Photo: <img src="{{ request.processed_photo.url }}" width="200"></p>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endblock content %}

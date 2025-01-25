@@ -2,8 +2,65 @@
 {% load static %}
 
 {% block content %}
-
-<div class="container">
-    hello!
+{% include "main/includes/menu.html" %}
+<div class="container mt-5">
+    {% if user.is_authenticated %}
+    <p>Welcome, {{ user.username }}!
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+    </p>
+{% else %}
+    <p><a href="{% url 'login' %}">Login</a> or <a href="{% url 'register' %}">Register</a></p>
+{% endif %}
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Загрузка фотографии</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" class="upload-form">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="imageInput" class="form-label">Выберите фотографию</label>
+                            <input type="file" class="form-control" id="imageInput" name="image" accept="image/*" required>
+                        </div>
+                        <div class="mb-3">
+                            <div class="image-preview" id="imagePreview">
+                                <img src="" alt="Preview" class="img-fluid d-none">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Загрузить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .upload-form {
+        position: relative;
+    }
+    .image-preview {
+        max-width: 100%;
+        margin-top: 10px;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .image-preview img {
+        max-width: 100%;
+        height: auto;
+    }
+</style>
+
+<script>
+    document.getElementById('imageInput').addEventListener('change', function(event) {
+        const preview = document.querySelector('#imagePreview img');
+        preview.classList.remove('d-none');
+        preview.src = URL.createObjectURL(event.target.files[0]);
+    });
+</script>
 {% endblock content %}
