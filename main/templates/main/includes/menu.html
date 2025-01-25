@@ -1,0 +1,27 @@
+<div class="row justify-content-between">
+    {% for category in categories %}
+        <div class="col-md-5" style="margin-bottom: 5rem;" data-aos="fade-up">
+            <div class="menu-pop">
+                <p class="menu-pop__name">{{ category.name }}</p>
+            </div>
+            {% for dish in category.dish_set.all %}
+                <div class="mb-4">
+                    <div class="menu-other d-flex justify-content-between m-0">
+                        <div class="menu-set m-0">
+                            <p class="menu-set__text m-0">{{ dish.name }}</p>
+                        </div>
+                        <div class="menu-set_price m-0">
+                            <p class="menu-set_price__text m-0">{{ dish.price }} ₽</p>
+                        </div>
+                    </div>
+                    {% if dish.description %}
+                    <div class="menu_descript m-0">
+                        <p class="menu_descript__text m-0">{{ dish.description }}</p>
+                    </div>
+                {% endif %}
+                </div>
+                
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>

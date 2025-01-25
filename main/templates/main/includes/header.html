@@ -1,0 +1,37 @@
+{% load static %}
+<div class="container" style="margin-bottom: 8rem;">
+    <div class="row" style="margin-top: 2rem;">
+        <div class="col-md-2 menu-logo">
+            <a href="{% url "index" %}">
+                <img src="{{ profile.logo.url }}" alt="">
+            </a>
+        </div>
+        <div class="col-md-10 menu">
+            <nav>
+                <a href="{% url "index" %}">Главная</a>
+                <a href="{% url "index" %}#about">О нас</a>
+                <div class="d-flex" style="align-items: center;">
+                    <img src="{% static "img/menus.svg" %}" alt="" style="width: 25px; height: 25px; margin-right: 0.5rem;">
+                    <a href="{% url "index" %}#menu">Меню</a>
+                </div>
+                <div class="d-flex" style="align-items: center;">
+                    <img src="{% static 'img/telefon.svg' %}" alt="" style="width: 25px; height: 25px; margin-right: 0.5rem;">
+                    <a href="{% url "contacts" %}">Контакты</a>
+                </div>
+              </nav>
+        </div>
+        <div class="dropdown col-md-10  ">
+            <a class="nav-link dropdown-toggle d-flex justify-content-end"  href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" style="color: aliceblue;" width="50" height="50" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                  </svg>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <li><a class="dropdown-item" href="{% url "index" %}">Главная</a></li>
+                <li><a class="dropdown-item" href="{% url "index" %}#about">О нас</a></li>
+                <li><a class="dropdown-item" href="{% url "index" %}#menu">Меню</a></li>
+                <li><a class="dropdown-item" href="{% url "contacts" %}">Контакты</a></li>
+              </ul>
+        </div>
+    </div>
+</div>

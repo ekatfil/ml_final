@@ -1,0 +1,20 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+
+
+{% include "main/includes/main.html" %}
+{% include "main/includes/about.html" %}
+
+<div id="menu" class="menu-page container">
+    <div class="menu-title d-flex justify-content-center">
+        <p class="menu-title__text">
+            МЕНЮ
+        </p>
+    </div>
+    {% include "main/includes/popular.html" %}
+    {% include "main/includes/sets.html" %}
+    {% include "main/includes/menu.html" %}
+</div>
+{% endblock content %}
