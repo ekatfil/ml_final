@@ -43,13 +43,14 @@ module.exports = (env, argv) => {
             compress: true,
             port: 9000,
             hot: true,
-            proxy: {
-                '/': {
+            proxy: [
+                {
+                    context: ['/'],
                     target: 'http://127.0.0.1:8000',
                     secure: false,
                     changeOrigin: true,
                 },
-            },
+            ],
         },
         devtool: isDevelopment ? 'inline-source-map' : false,
     };
