@@ -132,10 +132,7 @@ class Detector:
 
         else:
             image = transforms.ToTensor()(img)
-            # Add a batch dimension
             image = image.unsqueeze(0)
-            # Move the image to the right device
-            # image = image.to(device)
             predictions = self.MODELS[model_name].eval()(image)
             self.process_predictions(image, predictions, treshold=treshold)
 
@@ -143,41 +140,40 @@ class Detector:
         return result
 
     def process_predictions(self, image, predictions, treshold=0.5):
+       
         image = image.squeeze(0).permute(1, 2, 0).numpy()
-
-        # Get the predictions for the first image in the batch
+        
         boxes = predictions[0]["boxes"].detach().cpu().numpy()
         scores = predictions[0]["scores"].detach().cpu().numpy()
         labels = predictions[0]["labels"].detach().cpu().numpy()
 
-        # Create a figure and axes
-        fig, ax = plt.subplots(1, figsize=(12, 12))
+        fig, ax = plt.subplots(1, figsize=(8, 8), dpi=100)
+        ax.imshow(image)
+        mask = scores > treshold
+        boxes = boxes[mask]
+        scores = scores[mask]
+        labels = labels[mask]
 
-        # Display the image
-        # ax.imshow(image)
-
-        # Create a Rectangle patch for each bounding box
         for box, score, label in zip(boxes, scores, labels):
-            if score > treshold:
-                color = self.COLORS[self.COCO_INSTANCE_CATEGORY_NAMES[label]]
-                rect = patches.Rectangle(
-                    (box[0], box[1]),
-                    box[2] - box[0],
-                    box[3] - box[1],
-                    linewidth=1,
-                    edgecolor=color,
-                    facecolor="none",
-                )
+            color = self.colors[self.COCO_INSTANCE_CATEGORY_NAMES[label]]
+            rect = patches.Rectangle(
+                (box[0], box[1]),
+                box[2] - box[0],
+                box[3] - box[1],
+                linewidth=1,
+                edgecolor=color,
+                facecolor="none",
+            )
+            ax.add_patch(rect)
+            
+            ax.text(
+                box[0],
+                box[1],
+                f"{self.COCO_INSTANCE_CATEGORY_NAMES[label]}: {score:.2f}",
+                color=color,
+                fontsize=8,
+            )
 
-                # Add the patch to the Axes
-                ax.add_patch(rect)
-
-                # Add the label and score to the Axes
-                ax.text(
-                    box[0],
-                    box[1],
-                    f"{self.COCO_INSTANCE_CATEGORY_NAMES[label]}, prob: {score}",
-                    color=color,
-                )
         plt.axis("off")
-        plt.savefig("result.jpg", bbox_inches="tight", pad_inches=0)
+        plt.savefig("result.jpg", bbox_inches="tight", pad_inches=0, dpi=100)
+        plt.close(fig)  

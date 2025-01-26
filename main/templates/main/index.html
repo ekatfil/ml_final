@@ -25,7 +25,16 @@
                         {% csrf_token %}
                         <div class="mb-3">
                             <label for="imageInput" class="form-label">Выберите фотографию</label>
-                            <input type="file" class="form-control" id="imageInput" name="image" accept="image/*" required>
+                            <input type="file" class="form-control" id="imageInput" name="uploaded_photo" accept="image/*" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="methodSelect" class="form-label">Выберите метод обработки</label>
+                            <select class="form-select" id="methodSelect" name="detection_method" required>
+                                <option value="" selected disabled>Выберите метод...</option>
+                                {% for method in detection_methods %}
+                                    <option value="{{ method.id }}">{{ method.name }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="mb-3">
                             <div class="image-preview" id="imagePreview">

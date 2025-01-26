@@ -4,6 +4,7 @@ from .forms import UserRequestForm, RegisterForm
 from .detection import Detector
 from django.core.files.base import ContentFile
 import os
+import cv2
 from django.contrib.auth import login
 
 
@@ -14,30 +15,50 @@ def index(request):
             user_request = form.save(commit=False)
             user_request.user = request.user
             user_request.save()
-
-            # Обработка фото
-            detector = Detector()
-            uploaded_photo_path = user_request.uploaded_photo.path
-            processed_photo_path = os.path.join(
-                "media", "processed", os.path.basename(uploaded_photo_path)
-            )
-            result = detector.get_prediction(
-                uploaded_photo_path, model_name=user_request.detection_method.name
-            )
-
-            # Сохранение обработанного фото
-            user_request.processed_photo.save(
-                os.path.basename(processed_photo_path), ContentFile(result)
-            )
-            user_request.save()
-
-            return redirect("history")
+            
+            try:
+                detector = Detector()
+                uploaded_photo_path = user_request.uploaded_photo.path
+                img = cv2.imread(uploaded_photo_path)
+                if img is None:
+                    raise ValueError("Failed to load image")
+                    
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) 
+                result = detector.get_prediction(
+                    img, model_name=user_request.detection_method.name
+                )
+                
+                if result is None:
+                    raise ValueError("Detection failed")
+                
+               
+                success, buffer = cv2.imencode('.jpg', result)
+                if not success:
+                    raise ValueError("Failed to encode image")
+                
+                
+                filename = f"processed_{user_request.id}_{os.path.basename(uploaded_photo_path)}"
+                user_request.processed_photo.save(
+                    filename,
+                    ContentFile(buffer.tobytes()),
+                    save=True
+                )
+                user_request.refresh_from_db()
+                if not user_request.processed_photo:
+                    raise ValueError("Failed to save processed photo")
+                
+                return redirect("history")
+                
+            except Exception as e:
+                user_request.delete()
+                form.add_error(None, f"Processing failed: {str(e)}")
     else:
         form = UserRequestForm()
 
     context = {
         "title": "Главная страница",
         "form": form,
+        "detection_methods": DetectionMethod.objects.all(),
     }
 
     return render(request, "main/index.html", context)
@@ -68,3 +89,11 @@ def register(request):
         "form": form,
     }
     return render(request, "main/register.html", context)
+
+
+def methods(request):
+    context = {
+        "title": "Методы обработки",
+        "detection_methods": DetectionMethod.objects.all(),
+    }
+    return render(request, "main/methods.html", context)
