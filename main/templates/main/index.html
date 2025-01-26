@@ -2,47 +2,43 @@
 {% load static %}
 
 {% block content %}
-{% include "main/includes/menu.html" %}
-<div class="container mt-5">
-    {% if user.is_authenticated %}
-    <p>Welcome, {{ user.username }}!
-    <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit">Logout</button>
-    </form>
-    </p>
-{% else %}
-    <p><a href="{% url 'login' %}">Login</a> or <a href="{% url 'register' %}">Register</a></p>
-{% endif %}
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Загрузка фотографии</h4>
-                </div>
-                <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data" class="upload-form">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="imageInput" class="form-label">Выберите фотографию</label>
-                            <input type="file" class="form-control" id="imageInput" name="uploaded_photo" accept="image/*" required>
+<div class="row g-0">
+    <div class="col-1">
+        {% include "main/includes/menu.html" %}
+    </div>
+    <div class="col-11">
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">Загрузка фотографии</h4>
                         </div>
-                        <div class="mb-3">
-                            <label for="methodSelect" class="form-label">Выберите метод обработки</label>
-                            <select class="form-select" id="methodSelect" name="detection_method" required>
-                                <option value="" selected disabled>Выберите метод...</option>
-                                {% for method in detection_methods %}
-                                    <option value="{{ method.id }}">{{ method.name }}</option>
-                                {% endfor %}
-                            </select>
+                        <div class="card-body">
+                            <form method="POST" enctype="multipart/form-data" class="upload-form">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="imageInput" class="form-label">Выберите фотографию</label>
+                                    <input type="file" class="form-control" id="imageInput" name="uploaded_photo" accept="image/*" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="methodSelect" class="form-label">Выберите метод обработки</label>
+                                    <select class="form-select" id="methodSelect" name="detection_method" required>
+                                        <option value="" selected disabled>Выберите метод...</option>
+                                        {% for method in detection_methods %}
+                                            <option value="{{ method.id }}">{{ method.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="image-preview" id="imagePreview">
+                                        <img src="" alt="Preview" class="img-fluid d-none">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Загрузить</button>
+                            </form>
                         </div>
-                        <div class="mb-3">
-                            <div class="image-preview" id="imagePreview">
-                                <img src="" alt="Preview" class="img-fluid d-none">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Загрузить</button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
