@@ -2,19 +2,72 @@
 {% load static %}
 
 {% block content %}
-{% include "main/includes/menu.html" %}
-<div class="container mt-5">
-    <h1>Detection History</h1>
-    <ul>
-        {% for request in user_requests %}
-        <li>
-            <p>Date: {{ request.date }}</p>
-            <p>Method: {{ request.detection_method.name }}</p>
-            <p>Uploaded Photo: <img src="{{ request.uploaded_photo.url }}" width="200"></p>
-            <p>Processed Photo: <img src="{{ request.processed_photo.url }}" width="200"></p>
-        </li>
-        {% endfor %}
-    </ul>
+
+<div class="row g-0">
+    <div class="col-1">
+        {% include "main/includes/menu.html" %}
+    </div>
+    <div class="col-11">
+        <div class="container mt-5">
+            <h1 class="mb-4 text-center">История детекции</h1>
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+                {% for request in user_requests %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">Запрос от {{ request.date|date:"d.m.Y H:i" }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <span class="badge bg-secondary">Метод: {{ request.detection_method.name }}</span>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Исходное фото</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <a href="{{ request.uploaded_photo.url }}" target="_blank">
+                                                <img src="{{ request.uploaded_photo.url }}" class="img-fluid rounded" alt="Исходное фото">
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Результат обработки</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <a href="{{ request.processed_photo.url }}" target="_blank">
+                                                <img src="{{ request.processed_photo.url }}" class="img-fluid rounded" alt="Обработанное фото">
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.img-fluid {
+    object-fit: cover;
+    height: 200px;
+    width: 100%;
+}
+</style>
 
 {% endblock content %}

@@ -6,8 +6,10 @@ from django.core.files.base import ContentFile
 import os
 import cv2
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 
 
+@login_required(login_url="login")
 def index(request):
     detection_methods = DetectionMethod.objects.all()
     if request.method == "POST":
@@ -62,6 +64,7 @@ def index(request):
     return render(request, "main/index.html", context)
 
 
+@login_required(login_url="login")
 def history(request):
     user_requests = UserRequest.objects.filter(user=request.user).order_by("-date")
 
