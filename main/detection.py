@@ -126,54 +126,124 @@ class Detector:
 
     def get_prediction(self, img, model_name="COCO", treshold=0.5):
         if model_name in ["COCO", "Open Images"]:
+            # Convert RGB to BGR for YOLO processing
+            img_bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            
             model = YOLO(self.MODELS[model_name])
-            result = model([img])[0]
-            result.save(filename="result.jpg")
+            results = model(img_bgr)[0]
+            
+            # Plot directly using cv2 instead of YOLO's built-in plotting
+            plotted_img = img_bgr.copy()
+            
+            for box in results.boxes:
+                # Get box coordinates, confidence and class
+                x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+                conf = box.conf[0].cpu().numpy()
+                cls = int(box.cls[0].cpu().numpy())
+                
+                if conf > treshold:
+                    # Get random color for this class
+                    color = [int(c * 255) for c in self.colors.get(str(cls), (1.0, 1.0, 1.0))]
+                    
+                    # Draw rectangle
+                    cv2.rectangle(
+                        plotted_img, 
+                        (int(x1), int(y1)), 
+                        (int(x2), int(y2)), 
+                        color, 
+                        2
+                    )
+                    
+                    # Add label
+                    label = f"{results.names[cls]}: {conf:.2f}"
+                    (label_width, label_height), _ = cv2.getTextSize(
+                        label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1
+                    )
+                    
+                    cv2.rectangle(
+                        plotted_img,
+                        (int(x1), int(y1) - label_height - 5),
+                        (int(x1) + label_width, int(y1)),
+                        color,
+                        -1,
+                    )
+                    
+                    cv2.putText(
+                        plotted_img,
+                        label,
+                        (int(x1), int(y1) - 5),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (255, 255, 255),
+                        1,
+                    )
+            
+            return plotted_img
 
         else:
             image = transforms.ToTensor()(img)
             image = image.unsqueeze(0)
             predictions = self.MODELS[model_name].eval()(image)
             self.process_predictions(image, predictions, treshold=treshold)
-
-        result = cv2.imread("result.jpg")
-        return result
+            result = cv2.imread("result.jpg")
+            return result
 
     def process_predictions(self, image, predictions, treshold=0.5):
-       
-        image = image.squeeze(0).permute(1, 2, 0).numpy()
+        # Convert tensor to numpy array
+        image = (image.squeeze(0).permute(1, 2, 0).numpy() * 255).astype(np.uint8)
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         
+        # Get predictions
         boxes = predictions[0]["boxes"].detach().cpu().numpy()
         scores = predictions[0]["scores"].detach().cpu().numpy()
         labels = predictions[0]["labels"].detach().cpu().numpy()
 
-        fig, ax = plt.subplots(1, figsize=(8, 8), dpi=100)
-        ax.imshow(image)
+        # Filter predictions by threshold
         mask = scores > treshold
         boxes = boxes[mask]
         scores = scores[mask]
         labels = labels[mask]
 
+        # Draw boxes and labels using OpenCV
         for box, score, label in zip(boxes, scores, labels):
-            color = self.colors[self.COCO_INSTANCE_CATEGORY_NAMES[label]]
-            rect = patches.Rectangle(
-                (box[0], box[1]),
-                box[2] - box[0],
-                box[3] - box[1],
-                linewidth=1,
-                edgecolor=color,
-                facecolor="none",
-            )
-            ax.add_patch(rect)
+            # Get color for this class
+            color = [int(c * 255) for c in self.colors[self.COCO_INSTANCE_CATEGORY_NAMES[label]]]
             
-            ax.text(
-                box[0],
-                box[1],
-                f"{self.COCO_INSTANCE_CATEGORY_NAMES[label]}: {score:.2f}",
-                color=color,
-                fontsize=8,
+            # Draw rectangle
+            cv2.rectangle(
+                image,
+                (int(box[0]), int(box[1])),
+                (int(box[2]), int(box[3])),
+                color,
+                2
+            )
+            
+            # Add label
+            label_text = f"{self.COCO_INSTANCE_CATEGORY_NAMES[label]}: {score:.2f}"
+            (label_width, label_height), _ = cv2.getTextSize(
+                label_text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1
+            )
+            
+            # Draw label background
+            cv2.rectangle(
+                image,
+                (int(box[0]), int(box[1]) - label_height - 5),
+                (int(box[0]) + label_width, int(box[1])),
+                color,
+                -1,
+            )
+            
+            # Draw label text
+            cv2.putText(
+                image,
+                label_text,
+                (int(box[0]), int(box[1]) - 5),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (255, 255, 255),
+                1,
             )
 
-        plt.axis("off")
-        plt.savefig("result.jpg", bbox_inches="tight", pad_inches=0, dpi=100)
-        plt.close(fig)  
+        # Save result directly using OpenCV
+        cv2.imwrite("result.jpg", image)
+        return image  
